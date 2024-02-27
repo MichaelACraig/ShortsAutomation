@@ -3,7 +3,19 @@ from googleapiclient.discovery import build
 from utils import YT_API_KEY
 import urllib.request
 import re
+from bs4 import BeautifulSoup
+import requests
 
+"""
+NOTES:
+ - Issue with ExtractChannelID and YTChannelVideoIDCollection, when inputting a URL with an @ symbol (i.e : https://www.youtube.com/@GianLecoMC), the function returns:
+    - GianLecoMC for ExtractChannelID
+    - Channel not found for YTChannelVideoIDCollection
+    - Channel Response: {'kind': 'youtube#channelListResponse', 'etag': 'RuuXzTIr0OoDqI4S0RU6n4FqKEM', 'pageInfo': {'totalResults': 0, 'resultsPerPage': 5}}
+    - This is an issue with the Youtube API, as the channel does exist, and the URL is valid.
+    - The issue is that the API is not recognizing the channel ID from the username, and is returning a 0 result page.
+    - This is a problem with the API, and not the code, as the code is functioning as intended.
+"""
 # Youtube API Interactions
 youtube = build('youtube', 'v3', developerKey=YT_API_KEY)
 
@@ -26,18 +38,20 @@ def YTChannelVideoIDCollection(channelURL): # Intakes Channel Username, returns 
         print('Invalid Channel Username')
         return []
     
-    channelRequest = youtube.channels().list( # Request to Youtube API to get the channel ID
-        part='id',
-        forUsername = channelUsername
-    )
-    channelResponse = channelRequest.execute() 
+    # If the channelUsername is a channel ID, then we can skip the first part of the function
+    if len(channelUsername) != 24: # If the channelUsername is not a channel ID
+        channelRequest = youtube.channels().list( # Request to Youtube API to get the channel ID
+            part='id',
+            forUsername = channelUsername
+        )
+        channelResponse = channelRequest.execute() 
 
-    if 'items' not in channelResponse or not channelResponse['items']: # If the channel doesn't exist
-        print('Channel not found')
-        print('Channel Response:', channelResponse)  # Print channel response for debugging
-        return []
+        if 'items' not in channelResponse or not channelResponse['items']: # If the channel doesn't exist
+            print('Channel not found')
+            print('Channel Response:', channelResponse)  # Print channel response for debugging
+            return []
     
-    channelID = channelResponse['items'][0]['id']
+        channelID = channelResponse['items'][0]['id']
 
     videoIDS = []
     nextPageToken = None
@@ -70,9 +84,16 @@ def ExtractChannelID(youtubeURL): # Intakes Youtube URL, returns Channel ID or U
     matchTwo = re.search(patternTwo, youtubeURL)
     matchThree = re.search(patternThree, youtubeURL)
 
-    if matchOne:
-        print(matchOne.group(1))
-        return matchOne.group(1)
+    if matchOne: # If it is patternOne (@Username), partial scrape job; Scrape for the channel ID using Beautifulsoup
+        response = requests.get(youtubeURL)
+        
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            newURL = soup.find('link', rel='canonical')['href'] # This is the channel URL
+            return ExtractChannelID(newURL)
+
+        else:
+            print('Invalid URL: Status Code:', response.status_code)
     
     elif matchTwo:
         print(matchTwo.group(2))
@@ -86,4 +107,7 @@ def ExtractChannelID(youtubeURL): # Intakes Youtube URL, returns Channel ID or U
 
 def YTPlaylistIDCollection(playlistURL): # Intakes Playlist URL, returns list of IDs that link to Youtube videos
     print('')   
+
+
+print(YTChannelVideoIDCollection('https://www.youtube.com/@GianLecoMC')) 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
