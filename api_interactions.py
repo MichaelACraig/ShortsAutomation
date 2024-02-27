@@ -8,13 +8,9 @@ import requests
 
 """
 NOTES:
- - Issue with ExtractChannelID and YTChannelVideoIDCollection, when inputting a URL with an @ symbol (i.e : https://www.youtube.com/@GianLecoMC), the function returns:
-    - GianLecoMC for ExtractChannelID
-    - Channel not found for YTChannelVideoIDCollection
-    - Channel Response: {'kind': 'youtube#channelListResponse', 'etag': 'RuuXzTIr0OoDqI4S0RU6n4FqKEM', 'pageInfo': {'totalResults': 0, 'resultsPerPage': 5}}
-    - This is an issue with the Youtube API, as the channel does exist, and the URL is valid.
-    - The issue is that the API is not recognizing the channel ID from the username, and is returning a 0 result page.
-    - This is a problem with the API, and not the code, as the code is functioning as intended.
+ - Fixed issue with YTChannelVideoIDCollection(), however, bug will arise if you input a channel name with 24 characters.
+ - This is because the funciton will assume that it is a channel ID and will not check it accordingly, so it will not work.
+ - Fix later!
 """
 # Youtube API Interactions
 youtube = build('youtube', 'v3', developerKey=YT_API_KEY)
@@ -35,11 +31,11 @@ def YTChannelVideoIDCollection(channelURL): # Intakes Channel Username, returns 
     channelID = None
     
     if channelUsername is None:
-        print('Invalid Channel Username')
+        print('Invalid Channel Username: Issue with ExtractChannelID')
         return []
     
     # If the channelUsername is a channel ID, then we can skip the first part of the function
-    if len(channelUsername) != 24: # If the channelUsername is not a channel ID
+    if len(channelUsername) != 24: # If the channelUsername is not a channel ID;
         channelRequest = youtube.channels().list( # Request to Youtube API to get the channel ID
             part='id',
             forUsername = channelUsername
@@ -96,11 +92,11 @@ def ExtractChannelID(youtubeURL): # Intakes Youtube URL, returns Channel ID or U
             print('Invalid URL: Status Code:', response.status_code)
     
     elif matchTwo:
-        print(matchTwo.group(2))
+        #print(matchTwo.group(2))
         return matchTwo.group(2)
     
     elif matchThree:
-        print(matchThree.group(1))
+        #print(matchThree.group(1))
         return matchThree.group(1)
     else:
         return None
