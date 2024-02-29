@@ -1,6 +1,13 @@
 # Calls API Interactions and pulls video data into RawVideoData
-from api_interactions import YTVideoDownload
+from api_interactions import YTVideoDownloadBackground, YTVideoDownloadContent, YTChannelVideoIDCollection, ExtractChannelID
+
 import math
+
+'''
+NOTES:
+- Fix menus for bad inputs with Youtube
+
+'''
 
 def MenuOne():
     print('1. Youtube\n2. Reddit\n3. Instagram\n4. Tiktok\n5. Facebook\n6. Twitter\n7. Twitch')
@@ -15,7 +22,7 @@ def MenuOne():
             print('Invalid input. Please enter a number 1-7')
 
 def MenuYT():
-    print('1. Download Video\n2. Download Videos from Channel\n3. Download Videos from Playlist')
+    print('1. Download By Video\n2. Download Videos from Channel\n3. Download Videos from Playlist')
     while True:
         try:
             output = int(input("Enter the action you want to perform:"))
@@ -33,12 +40,40 @@ if choiceOne == 1:
     output = MenuYT()
 
     if output == 1:
-        print('Download Video Selected')
+        print('Download By Video Selected')
         videoID = input('Enter the video ID: ')
-        #YTVideoDownload(videoID)
+        choiceTwoA = input('Is the video background or content? (b/c):')
 
+        if choiceTwoA  == 'b':
+            YTVideoDownloadBackground(videoID)
+
+        elif choiceTwoA == 'c':
+            YTVideoDownloadContent(videoID)    
+        
+        else:
+            print('Invalid input. Please enter b or c')
+    
     elif output == 2:
         print('Download Videos from Channel Selected')
+        channelURL = input('Enter the channel URL: ')
+        choiceTwoB = input('Is the video background or content? (b/c):')
+
+        if choiceTwoB  == 'b':
+            channelID = ExtractChannelID(channelURL)
+            videos = YTChannelVideoIDCollection(channelURL)
+
+            for YTVideo in videos:
+                YTVideoDownloadBackground(YTVideo)
+
+        elif choiceTwoB == 'c':
+            channelID = ExtractChannelID(channelURL)
+            videos = YTChannelVideoIDCollection(channelURL)
+
+            for YTVideo in videos:
+                YTVideoDownloadContent(YTVideo)
+
+        else:
+            print('Invalid input. Please enter b or c')        
 
     elif output == 3:
         print('Download Videos from Playlist Selected')        

@@ -5,6 +5,7 @@ import urllib.request
 import re
 from bs4 import BeautifulSoup
 import requests
+from pytube import YouTube
 
 """
 NOTES:
@@ -15,18 +16,17 @@ NOTES:
 # Youtube API Interactions
 youtube = build('youtube', 'v3', developerKey=YT_API_KEY)
 
-def YTVideoDownload(videoID): # Downloads a Youtube video from a non-copyright source
-    response = youtube.videos().list(
-        part='snippet',
-        id=videoID
-    ).execute()
+def YTVideoDownloadBackground(videoID): # Downloads a Youtube video from a non-copyright source; Background
+    videoURL = f"https://www.youtube.com/watch?v={videoID}"
+    youtube = YouTube(videoURL)
+    youtube.streams.first().download(output_path='C:\\Users\\13212\\Desktop\\Project Files\\ShortsAutomation\\RawVideoData', filename='background' + videoID)
 
-    videoURL = response['items'][0]['snippet']['thumbnails']['maxres']['url']
-
-    urllib.request.urlretrieve(videoURL, 'video.mp4')
+def YTVideoDownloadContent(videoID): # Downloads a Youtube video from a non-copyright source; Content
+    videoURL = f"https://www.youtube.com/watch?v={videoID}"
+    youtube = YouTube(videoURL)
+    youtube.streams.first().download(output_path='C:\\Users\\13212\\Desktop\\Project Files\\ShortsAutomation\\RawVideoData', filename='content'+ videoID)
 
 def YTChannelVideoIDCollection(channelURL): # Intakes Channel Username, returns list of IDs of all Youtube videos on the channel
-    
     channelUsername = ExtractChannelID(channelURL) # Extract Channel ID from Username
     channelID = None
     
@@ -103,7 +103,4 @@ def ExtractChannelID(youtubeURL): # Intakes Youtube URL, returns Channel ID or U
 
 def YTPlaylistIDCollection(playlistURL): # Intakes Playlist URL, returns list of IDs that link to Youtube videos
     print('')   
-
-
-print(YTChannelVideoIDCollection('https://www.youtube.com/@GianLecoMC')) 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
