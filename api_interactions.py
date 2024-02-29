@@ -100,7 +100,4 @@ def ExtractChannelID(youtubeURL): # Intakes Youtube URL, returns Channel ID or U
         return matchThree.group(1)
     else:
         return None
-
-def YTPlaylistIDCollection(playlistURL): # Intakes Playlist URL, returns list of IDs that link to Youtube videos
-    print('')   
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
