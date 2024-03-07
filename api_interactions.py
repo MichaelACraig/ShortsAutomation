@@ -1,11 +1,11 @@
 # All API interactions with Youtube and other platforms go through here
 from googleapiclient.discovery import build
-from utils import YT_API_KEY
-import urllib.request
-import re
 from bs4 import BeautifulSoup
+from utils import YT_API_KEY
+from pytube import YouTube
 import requests
 from pytube import YouTube
+import re
 
 """
 NOTES:
@@ -19,12 +19,14 @@ youtube = build('youtube', 'v3', developerKey=YT_API_KEY)
 def YTVideoDownloadBackground(videoID): # Downloads a Youtube video from a non-copyright source; Background
     videoURL = f"https://www.youtube.com/watch?v={videoID}"
     youtube = YouTube(videoURL)
-    youtube.streams.first().download(output_path='C:\\Users\\13212\\Desktop\\Project Files\\ShortsAutomation\\RawVideoData', filename='background' + videoID)
+    youtube.streams.get_highest_resolution().download(output_path='C:\\Users\\13212\\Desktop\\Project Files\\ShortsAutomation\\RawVideoData', filename='background' + videoID + '.mp4')
+    print('Download Complete')
 
 def YTVideoDownloadContent(videoID): # Downloads a Youtube video from a non-copyright source; Content
     videoURL = f"https://www.youtube.com/watch?v={videoID}"
     youtube = YouTube(videoURL)
-    youtube.streams.first().download(output_path='C:\\Users\\13212\\Desktop\\Project Files\\ShortsAutomation\\RawVideoData', filename='content'+ videoID)
+    youtube.streams.get_highest_resolution().download(output_path='C:\\Users\\13212\\Desktop\\Project Files\\ShortsAutomation\\RawVideoData', filename='content'+ videoID + '.mp4')
+    print('Download Complete')
 
 def YTChannelVideoIDCollection(channelURL): # Intakes Channel Username, returns list of IDs of all Youtube videos on the channel
     channelUsername = ExtractChannelID(channelURL) # Extract Channel ID from Username
@@ -100,4 +102,10 @@ def ExtractChannelID(youtubeURL): # Intakes Youtube URL, returns Channel ID or U
         return matchThree.group(1)
     else:
         return None
+
+def YTPlaylistIDCollection(playlistURL): # Intakes Playlist URL, returns list of IDs that link to Youtube videos
+    print('')   
+
+
+print(YTChannelVideoIDCollection('https://www.youtube.com/@GianLecoMC')) 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
